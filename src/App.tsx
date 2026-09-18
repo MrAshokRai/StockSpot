@@ -13,6 +13,7 @@ import { MerchantDashboard } from './components/MerchantDashboard';
 import { AdminVerificationDashboard } from './components/AdminVerificationDashboard';
 import { CustomerOrdersModal } from './components/CustomerOrdersModal';
 import { TrustCertificateModal } from './components/TrustCertificateModal';
+import { AuthModal } from './components/AuthModal';
 import { Toast, ToastMessage } from './components/Toast';
 import {
   PackageSearch,
@@ -42,6 +43,7 @@ export const App: React.FC = () => {
   const [trustCertProduct, setTrustCertProduct] = useState<Product | undefined>(undefined);
   const [showStockoutModal, setShowStockoutModal] = useState(false);
   const [showReservationsModal, setShowReservationsModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Toast notifications
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -169,6 +171,7 @@ export const App: React.FC = () => {
         setActiveTab={setActiveTab}
         onOpenReservations={() => setShowReservationsModal(true)}
         onOpenStockoutModal={() => setShowStockoutModal(true)}
+        onOpenAuth={() => setShowAuthModal(true)}
         onShowToast={addToast}
       />
 
@@ -355,6 +358,13 @@ export const App: React.FC = () => {
             setTrustCertMerchant(null);
             setTrustCertProduct(undefined);
           }}
+        />
+      )}
+
+      {showAuthModal && (
+        <AuthModal
+          onClose={() => setShowAuthModal(false)}
+          onShowToast={addToast}
         />
       )}
 

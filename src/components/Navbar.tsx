@@ -8,6 +8,7 @@ interface NavbarProps {
   setActiveTab: (tab: 'explore' | 'radar' | 'merchant' | 'admin') => void;
   onOpenReservations: () => void;
   onOpenStockoutModal: () => void;
+  onOpenAuth: () => void;
   onShowToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
 }
 
@@ -16,6 +17,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab,
   onOpenReservations,
   onOpenStockoutModal,
+  onOpenAuth,
   onShowToast
 }) => {
   const currentUser = store.getCurrentUser();
@@ -180,6 +182,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </optgroup>
               </select>
             </div>
+
+            {/* Real Supabase Auth Button */}
+            <button
+              onClick={onOpenAuth}
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 transition-all"
+              title="Create real account with Supabase Auth"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>Auth / Register</span>
+            </button>
 
             {/* Reset Demo Button */}
             <button
