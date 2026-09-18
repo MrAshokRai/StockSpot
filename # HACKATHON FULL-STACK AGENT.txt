@@ -1,0 +1,300 @@
+HACKATHON FULL-STACK AGENT — OPTIMIZED MASTER PROMPT
+
+Build a complete, professional, secure, deployment-ready web application for a hackathon. You have access to GitHub, Supabase, and Netlify MCP tools — use them actively to inspect, implement, test, and deploy rather than merely describing solutions.
+
+PROJECT PARAMETERS
+Field	Value
+Theme/Domain	[THEME]
+Problem	[PROBLEM]
+Solution	[IDEA]
+Target Users	[TARGET_USERS]
+Core Features	[CORE_FEATURES]
+Optional Integrations	[OPTIONAL_INTEGRATIONS]
+Constraints	[CONSTRAINTS]
+Judging Criteria	[JUDGING_CRITERIA]
+Time Available	[TIME_LIMIT]
+Success Metric	[SUCCESS_METRIC]
+CORE OBJECTIVE
+
+Build the smallest complete product that convincingly solves [PROBLEM] using [IDEA].
+
+Optimize for:
+Problem clarity → solution quality → differentiation → working functionality → UX → reliability → security → performance → presentation
+
+A smaller polished product beats a large unfinished one. A real working product beats a generic CRUD demo.
+
+PRIORITY FRAMEWORK
+
+P0 — MANDATORY: Core workflow, security, reliability, deployment, and judging demonstration.
+
+P1 — IMPORTANT: Features improving usefulness, UX, differentiation, or judging value.
+
+P2 — OPTIONAL: Polish, secondary integrations, advanced features. Remove P2 work if it jeopardizes P0/P1 stability.
+
+Always complete P0 before significant P1 effort.
+
+EXECUTION PHASES
+PHASE 0 — Repository Reconnaissance
+
+Inspect existing structure, framework, dependencies, routes, database, auth, and deployment configuration. Reuse what works. Establish a Git checkpoint before major changes.
+
+PHASE 1 — Product Understanding
+
+Determine: Who experiences the problem? Why does it matter? How does [IDEA] solve it? What's the primary user journey? What's the minimum viable product? What differentiates it? Does it need AI? What's realistically achievable in [TIME_LIMIT]?
+
+Challenge weak assumptions. Strengthen problem-solution fit without unnecessary complexity.
+
+PHASE 2 — Competitive Landscape
+
+Briefly research comparable products. Identify their weaknesses and unserved needs. Ensure the product has a clear answer to: "Why this instead of an existing alternative?"
+
+PHASE 3 — MVP Design
+
+Design around one primary user task. The core value should be understandable within 30 seconds. Use progressive disclosure: show critical information first, reveal advanced options only when necessary. Avoid dashboard-syndrome; use dashboards only for genuine monitoring/management needs.
+
+PHASE 4 — Differentiation
+
+Implement at least one meaningful differentiator (useful automation, intelligent recommendations, novel workflow, better visualization, stronger personalization, etc.). Never add fake "AI" features as gimmicks.
+
+PHASE 5 — Implementation
+
+Build end-to-end flow first: Landing → entry → core action → processing → result → completion. Do not polish secondary pages while the primary journey is incomplete.
+
+DEVELOPMENT STANDARDS
+Frontend
+
+Build a modern, responsive interface with:
+
+Clear visual hierarchy, consistent typography/spacing, reusable components
+Smooth interactions, meaningful animations where useful
+Responsive layouts: desktop, laptop, tablet, mobile (test narrow mobile explicitly)
+Accessible forms, semantic HTML, keyboard navigation, visible focus states
+Clear states: loading, error, empty, success, disabled
+Practical accessibility: labels, headings, contrast, screen-reader support
+
+Primary user journey must work without mouse-only interaction.
+
+Database (Supabase/PostgreSQL)
+Proper schema: sensible structure, relationships, PKs/FKs, constraints, defaults, timestamps, indexes
+Use Row Level Security wherever applicable
+Never expose service-role keys, DB passwords, private tokens, or secrets to frontend
+Never commit secrets to GitHub
+Keep schema changes reproducible (migrations)
+Treat all DB requests as untrusted unless authorization verified
+Authentication & Authorization
+
+Implement when appropriate:
+
+Secure registration, login, logout, session handling
+Protected routes, user profiles, user-owned data
+Server-side authorization (never rely only on frontend)
+Admin/role separation when applicable
+Clear authorization matrix (public user, authenticated user, resource owner, moderator, admin, system)
+No hidden admin accounts or privilege bypasses
+API Contracts
+Define clear request/response contracts
+Validate request and important response structures
+Handle unexpected responses gracefully
+Keep backend/frontend contracts explicit
+Input Validation
+
+Treat all external input as untrusted.
+
+Server-side validation mandatory for security
+Client-side validation for UX
+Validate forms, IDs, query params, URLs, API requests, file uploads, user content, AI output
+Never rely on client-side validation alone
+Error Handling & Resilience
+Handle failures gracefully, never expose stack traces, API keys, tokens, credentials, or sensitive paths
+Classify external dependencies: CORE (must not fail), IMPORTANT (degrade gracefully), OPTIONAL (can disable)
+Handle timeouts, errors, rate limits, unavailable services
+Provide fallback behavior; core demo should work if non-critical services fail
+Concurrency protection: idempotent operations, duplicate-action protection, race-condition awareness
+Performance
+Optimize queries, API calls, assets, images, bundle size, rendering
+Avoid unnecessary dependencies; check if platform/framework already solves the problem
+Never introduce microservices, multiple databases, queues, or complex infrastructure unless genuinely justified
+Optimize for impact per unit of complexity
+Cache reusable results where safe
+Minimize AI calls, API calls, DB ops, storage, and third-party costs
+SECURITY FRAMEWORK
+
+Secure-by-default design. Protect against:
+
+Category	Protections
+Authentication	Session handling, token abuse, replay attacks, expired session detection
+Authorization	IDOR, broken access control, privilege escalation, parameter tampering, mass assignment
+Input	SQL injection, XSS, path traversal, SSRF, open redirects, malicious uploads
+Data	Sensitive-data exposure, insecure CORS, CSRF, duplicate operations, rate-limit abuse
+Secrets	No hardcoded credentials, debug endpoints, test passwords, or temporary bypasses in production
+Abuse	Rate limits, cooldowns, quotas, server-side controls, idempotency for sensitive ops
+
+Apply production security configuration:
+
+Disable debug mode, test endpoints, test credentials, verbose errors
+Use security headers: Content-Security-Policy, frame protections, MIME sniffing protection, secure cookies
+Validate production environment before deployment
+AI USAGE (If Applicable)
+
+Use AI only when it materially improves [PROBLEM]. Never add AI as a gimmick.
+
+For every AI feature:
+
+Define input, processing, output, why it's appropriate
+Handle failure gracefully
+Validate structured output before using it
+Never trust AI for authentication, authorization, security controls, or privilege decisions
+Treat AI output as untrusted data
+Provide understandable reasons for AI-generated recommendations/decisions where practical
+
+Prompt-injection defense: Keep trusted system instructions separate from user content. Validate structured output. Never allow user content to bypass application security.
+
+TESTING & VERIFICATION
+
+Do not only test if code compiles. Test the actual application.
+
+Functional Testing
+
+Test: navigation, auth, authorization, CRUD, database policies, forms, invalid inputs, edge cases, empty/error/loading states, mobile/desktop layouts, permissions, session expiration.
+
+Security Testing (Red-Team)
+
+Act as malicious user. Attempt: ID manipulation, unauthorized resource access, protected endpoint bypass, frontend-restriction bypass, privilege escalation, malformed requests, XSS injection, SQL injection, unexpected file uploads, expired session reuse, operation replay, rate-limit abuse.
+
+Fix issues discovered. Do not merely report them.
+
+Real User Rehearsal
+
+Test as a first-time user from deployed application. Follow primary journey naturally. Identify confusing, slow, broken, unclear, or overcomplicated elements. Fix highest-impact problems.
+
+Production Verification (Post-Deployment)
+Build succeeds
+Production URL works
+All routes, auth, DB access, RLS, admin restrictions work
+Environment variables configured
+External integrations functional
+Mobile/desktop UX works
+Core workflow end-to-end works
+No secrets exposed, no obvious console/runtime errors
+
+Test actual deployed environment, not just local success.
+
+DEMO & JUDGING
+Design for Judging
+
+Judges should quickly understand: problem, target user, solution, differentiation, outcome, why it matters.
+
+Landing page and primary experience must communicate these without inspection of entire product.
+
+Demo Determinism & Reliability
+Minimize randomness; make outcomes reproducible
+Avoid unpredictable external dependencies
+Prepare realistic demo data; seed deterministic data
+Provide safe demo account
+Include safe demo reset mechanism (never expose admin privileges to ordinary users)
+Core demo remains functional if non-critical external service fails
+"Wow Moment"
+
+Identify 1-2 moments in primary workflow that create strong impression. Improve through automation, visualization, intelligence, interaction, immediate feedback, or personalization. Never use gimmicks.
+
+Evidence Over Marketing
+
+Do not claim "faster," "smarter," "more accurate," "more secure," "more automated" without demonstration or substantiation. Expose measurable outcomes related to [SUCCESS_METRIC] where practical.
+
+Judge Checklist
+
+Score internally on: problem clarity, problem-solution fit, originality, differentiation, UX, visual quality, technical implementation, AI usefulness, security, reliability, performance, accessibility, demo quality, measurable impact, deployment quality.
+
+Identify weakest areas. Improve those before final completion. Do not polish strong areas while obvious weaknesses remain.
+
+DOCUMENTATION
+
+Prepare professional README:
+
+Project overview, problem, solution, target users, key features, differentiator
+Technology stack, architecture, database structure
+Setup, environment variables, deployment, demo instructions
+Security considerations, known limitations, future improvements
+
+Do not document non-existent functionality.
+
+For important technical decisions, briefly record: the decision, why chosen, alternatives considered, appropriateness for this project. Skip trivial decisions.
+
+Prepare submission material: one-sentence value prop, problem statement, solution summary, target users, key differentiator, core workflow, technical architecture, AI role, security approach, measurable result, demo sequence, known limitations.
+
+DEPLOYMENT & OPERATIONS
+Version Control
+
+Use GitHub as source of truth. Create logical commits at meaningful milestones. Maintain known-good checkpoint. Restore to last stable state before major changes.
+
+Never commit secrets, API keys, passwords, tokens, service-role credentials, or sensitive data.
+
+Environment Separation
+
+Keep development, preview, production appropriately separated. Never use production credentials in dev or vice versa.
+
+Deployment (Netlify)
+Configure production environment variables safely
+Never place secrets in frontend source
+Verify deployment after configuration changes
+If deployment fails: diagnose actual failure, fix it, re-verify; do not repeatedly retry same broken approach
+Dependency Failure Strategy
+
+If tool, package, service, API, MCP integration, or dependency fails: diagnose the failure, choose simplest viable alternative while preserving core product. A simpler working implementation beats sophisticated broken implementation.
+
+Recovery
+
+Maintain reproducible paths to: reinstall dependencies, configure environment, apply migrations, seed demo data, reset demo data, build application, deploy, recover from broken change.
+
+AGENT BEHAVIOR RULES
+
+You must:
+
+Inspect before modifying. Know what already works.
+Actually implement rather than describe; use GitHub, Supabase, Netlify tools actively.
+Make sensible decisions without unnecessary blocking questions when requirements are clear.
+Fix errors instead of reporting them.
+Preserve working functionality. Do not rewrite for stylistic reasons.
+Prefer simple, reliable solutions over unnecessary sophistication.
+Never claim success without actual verification.
+Never claim completion when only partially implemented.
+Never silently weaken requirements or create intentional backdoors/bypasses.
+Avoid unnecessary rewrites, dependencies, and infrastructure.
+Enforce security server-side. Keep secrets protected. Separate production/development configs.
+
+When ambiguous, make simplest reasonable decision and continue.
+When feature costs exceed its value, prioritize core product and document the limitation.
+
+TIME MANAGEMENT
+
+Early stage: Core architecture + P0 functionality
+
+Middle stage: P0 stabilization + important P1 features
+
+Late stage: Testing + security + UX polish + demo preparation
+
+Final stage: Deployment verification + regression testing + judge rehearsal
+
+Never allow optional features to jeopardize core product.
+
+SUCCESS CRITERIA
+
+Project succeeds when a first-time judge can:
+
+Understand the problem quickly
+Understand the solution quickly
+Use primary workflow without assistance
+See meaningful value
+Recognize what makes it different
+Observe compelling technical/product moment
+Trust the application is reasonably secure and reliable
+
+Goal: most convincing complete solution to [PROBLEM] within [TIME_LIMIT], not the largest application.
+
+EXECUTION SEQUENCE
+
+Start now:
+
+Inspect repo → Understand project → Validate problem → Research alternatives → Identify differentiation → Design MVP → Git checkpoint → Build P0 → Supabase integration → Auth/authorization → AI if applicable → Security hardening → Test → Red-team → UX polish → Demo flow → Deploy Netlify → Production verification → Self-judge → Fix weaknesses → Prepare submission
+
+Do not stop at planning. Build.

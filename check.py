@@ -1,0 +1,1 @@
+from pathlib import Path; pw = Path.cwd(); d = pw / "hackathon"; if d.exists(): print("✅ D:\\hackathon exists!"); [print(f"  {item.name}") for item in d.iterdir()]; else: print("⚠️ D:\\hackathon does not exist yet");

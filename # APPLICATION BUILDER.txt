@@ -1,0 +1,415 @@
+SECURITY-FIRST APPLICATION BUILDER — AUTONOMOUS CODING AGENT
+
+Build a complete, working, secure, reliable software application that solves [PROBLEM] using [IDEA].
+
+This is an optional companion application to the hackathon website. It must be independently functional while architected for secure future integration through explicit interfaces (not direct database coupling).
+
+PROJECT PARAMETERS
+Attribute	Value
+Theme/Domain	[THEME]
+Problem	[PROBLEM]
+Solution/Idea	[IDEA]
+Target Users	[TARGET_USERS]
+Core Features	[CORE_FEATURES]
+Optional Integrations	[OPTIONAL_INTEGRATIONS]
+Target Platforms	[PLATFORMS]
+Constraints	[CONSTRAINTS]
+Time Available	[TIME_LIMIT]
+Success Metric	[SUCCESS_METRIC]
+PRIMARY OBJECTIVE
+
+Build the smallest complete, production-quality software that convincingly solves [PROBLEM] through [IDEA].
+
+PRIORITY ORDER:
+SECURITY → RELIABILITY → CORRECTNESS/DATA INTEGRITY → SMOOTHNESS → USABILITY → PERFORMANCE → POLISH → OPTIONAL FEATURES
+
+The software must:
+
+Work as a real application (not a mockup).
+Protect against unauthorized access and abuse.
+Protect user data and application state.
+Fail safely and recover gracefully.
+Remain maintainable and architecturally clean.
+Integrate securely with the future website through explicit APIs.
+Never contain backdoors, hidden accounts, emergency bypasses, or security shortcuts.
+P0 / P1 / P2 PRIORITIZATION
+
+P0 (MANDATORY): Security, authentication, authorization, core workflow, data integrity, reliability, error handling, platform stability, safe communication boundaries, integration-ready architecture.
+
+P1 (IMPORTANT): Smooth UX, automation, synchronization capability, offline/poor-network handling, performance, platform-specific behavior, product differentiation.
+
+P2 (OPTIONAL): Advanced effects, secondary features, cosmetic polish, uncommon integrations.
+
+Complete P0 before substantial P1. Do not allow P2 to destabilize P0.
+
+EXECUTION PHASES
+PHASE 0 — RECONNAISSANCE & SETUP
+Inspect repository structure, existing application, database, authentication, API, shared types, schemas, environment configuration.
+Identify reusable components; avoid unnecessary rewrites.
+Establish Git checkpoint before major modifications.
+Determine appropriate application architecture for [PLATFORMS].
+Define product scope: minimum complete workflow, what genuinely requires an installed application vs. website, what may synchronize with the website, what remains local-only.
+PHASE 1 — ARCHITECTURE DESIGN
+
+Choose the simplest appropriate architecture for the actual requirements.
+
+Possible targets: Desktop application, mobile application, cross-platform application, local-first application, network-connected application, hybrid.
+
+Do not add multiple platforms unnecessarily.
+
+Separation of concerns:
+
+UI (untrusted) → Application Logic → Data/State → Secure API/Integration Boundary → External Services/Website
+
+Security-sensitive operations must remain outside untrusted client-side logic wherever possible.
+
+PHASE 2 — SECURITY & DATA PROTECTION
+
+TREAT EVERY EXTERNAL INPUT, CLIENT REQUEST, STORED VALUE, AND RESPONSE AS POTENTIALLY UNTRUSTED.
+
+Authentication & Session Management
+Implement secure login/logout.
+Properly handle session expiration and revocation.
+Never store secrets insecurely.
+Minimize token exposure.
+Use appropriate platform-specific secure storage.
+Safely handle account switching and credential loss.
+Do not trust locally modified authentication state.
+Authorization (Enforced on Trusted Side)
+
+Define explicit access for: unauthenticated user, authenticated user, resource owner, moderator, administrator, system service.
+
+CRITICAL RULE: Every protected operation must verify authorization on the trusted side. Never rely solely on:
+
+Hidden UI controls
+Client-side checks
+Disabled buttons
+Local flags
+Route obscurity
+Secret URLs
+Configuration values controlled by users
+
+A user must never access another user's resources or privileged operations by modifying requests.
+
+Administrator Security
+Separate administrator privileges clearly.
+Enforce privileges server-side.
+Never create hidden admin accounts, universal admin passwords, or emergency bypasses accessible to ordinary users.
+Minimize administrator capabilities to what is necessary.
+Data Security & Integrity
+
+Protect sensitive data in transit and at rest using appropriate platform mechanisms.
+
+Never expose in client-distributed code:
+
+Service-role credentials
+Database passwords
+Private API keys
+Server secrets
+Signing secrets
+Authentication secrets
+
+Prevent:
+
+Duplicate records
+Corrupted state
+Partial updates
+Race conditions
+Unsafe concurrent writes
+Unauthorized modifications
+Stale data overwriting newer data
+
+For sensitive operations, prefer idempotent behavior and safe retry mechanisms.
+
+Local Storage & Device Security
+Store only what is necessary.
+Do not place sensitive credentials in plaintext storage; use secure platform storage/credential facilities.
+Validate locally stored state before trusting it.
+Assume the local environment may be modified.
+Do not treat client-side storage as an authority for permissions.
+Handle corrupted local data safely.
+Avoid leaking sensitive data through logs, cache files, crash reports, screenshots, temporary files, or debug output.
+Request only the device permissions actually required.
+Network Security
+
+All application-to-server communication must use secure transport appropriate for production.
+
+Validate: host/origin, authentication state, request structure, response structure, server errors, timeouts, retry conditions.
+
+Never blindly trust arbitrary endpoints supplied by users. Do not disable transport security to bypass development errors. Do not accept invalid certificates in production.
+
+Threat Coverage
+
+Implement appropriate protections against:
+
+Unauthorized access, broken authentication, broken authorization, IDOR
+Privilege escalation, session/token abuse, token theft, replay attacks
+Request/parameter tampering, SQL injection, XSS, CSRF
+SSRF, path traversal, malicious files, unsafe deserialization
+Insecure local/deep-link storage, unsafe custom URL schemes, insecure IPC/local APIs
+Man-in-the-middle, certificate/connection validation failures, insecure CORS
+Debug endpoints, test credentials, development backdoors, excessive permissions, dependency vulnerabilities
+File & Media Handling
+
+If applicable:
+
+Restrict allowed types and validate actual file content.
+Enforce size limits.
+Prevent path traversal.
+Avoid arbitrary executable file handling.
+Sanitize filenames.
+Store files in isolated locations.
+Prevent unauthorized access and malicious upload abuse.
+Handle interrupted transfers safely.
+AI Usage (Only When Justified)
+Use AI only if it materially improves [PROBLEM].
+AI must never determine authentication, authorization, privileges, or security policy.
+Treat AI output as untrusted input; validate structured responses.
+Defend against prompt injection when user-controlled content reaches AI.
+Keep trusted instructions separate from untrusted user content.
+Handle unavailable, malformed, or unsafe AI output safely.
+PHASE 3 — INTEGRATION BOUNDARY & SYNCHRONIZATION
+
+Design a clear boundary between the application and the future website.
+
+The application must be integration-ready but not integration-dependent.
+
+Define stable, explicit contracts for:
+
+Authentication identity
+User resources
+Request/response structure
+Error handling
+Versioning
+Synchronization
+Conflict handling
+Timestamps and ownership
+
+Do not implement speculative synchronization complexity until required.
+
+Avoid: Direct unrestricted database access from client. Prefer: Application ↔ Secure API/Backend ↔ Database ↔ Website
+
+Synchronization Design (When Needed)
+Give records stable unique identifiers.
+Track creation/update timestamps appropriately.
+Detect stale updates; prevent duplicate operations.
+Make retries safe; handle interrupted synchronization.
+Handle network loss and partial synchronization.
+Resolve conflicting updates deterministically.
+Never silently discard user data.
+PHASE 4 — CORE WORKFLOW & UI
+
+Build the primary user journey end-to-end before secondary functionality.
+
+Typical flow: Launch → Authentication/Entry → Main Task → Processing → Result → Confirmation
+
+Adapt to actual [PROBLEM].
+
+Every important operation must provide clear feedback:
+
+Idle, Loading, Processing, Success, Failure, Retry, Offline, Unauthorized, Expired Session, Cancelled
+
+UI Requirements:
+
+Clear navigation
+One obvious primary action
+Minimal unnecessary steps
+Clear status feedback
+Simple forms
+Useful confirmations and empty states
+Clear errors
+Responsive/platform-appropriate layout
+Accessible controls
+Keyboard support (desktop) / touch-friendly (mobile)
+
+Avoid: Clutter, unnecessary dashboards, excessive configuration, decorative complexity, hidden essential actions, confusing terminology.
+
+PHASE 5 — RELIABILITY & FAILURE HANDLING
+
+The application must behave predictably under normal and abnormal conditions.
+
+Handle:
+
+Network failure, API failure, database failure
+Authentication expiration
+Interrupted operations, timeouts, slow/invalid/corrupted responses
+Missing resources, duplicate/concurrent actions
+Unexpected shutdown and restart
+
+Rules:
+
+Do not crash because a recoverable external dependency failed.
+Use bounded retries with appropriate conditions; do not endlessly retry.
+Fail closed for security-sensitive operations.
+Fail gracefully for non-critical dependencies.
+
+Offline Behavior (When Applicable):
+Clearly distinguish: local success, pending synchronization, synchronization success/failure, conflict, unauthorized state.
+
+Never fake synchronization success. When connectivity returns, synchronize safely.
+
+Error Handling:
+Errors must be understandable to users and useful for debugging.
+
+Never expose: stack traces, secrets, internal credentials, connection strings, internal filesystem paths, security-sensitive implementation details.
+
+Use internal logs for developers; present safe messages to users.
+
+Input Validation:
+Validate at trust boundaries (forms, identifiers, URLs, filenames, file types/sizes, query parameters, API requests/responses, imported data, synchronization payloads, AI output).
+
+Client validation improves UX. Server/trusted-side validation provides security. Never rely on client validation alone.
+
+PHASE 6 — TESTING & VERIFICATION
+
+Testing must verify real behavior, not merely that code compiles.
+
+Functional Testing
+First launch, registration/login, logout, session expiration, primary workflow
+Navigation, data creation/retrieval/modification/deletion
+Invalid input, empty states, error states, retry behavior
+Interrupted operations, offline behavior, synchronization
+Multiple users, resource ownership, platform-specific behavior
+Security Red-Team Testing
+
+Act as a malicious user. Attempt to:
+
+Access another user's resources, modify resource IDs, bypass frontend restrictions
+Call protected endpoints directly, escalate privileges, replay sensitive requests
+Reuse expired sessions, tamper with parameters, inject malicious input
+Upload malicious files, access hidden functionality, abuse synchronization
+Trigger duplicate operations, abuse rate limits, manipulate locally stored state
+Access privileged operations through alternate routes
+
+Fix discovered vulnerabilities before completion; do not merely document them.
+
+Reliability Testing
+
+Simulate: network loss, slow network, API timeout, backend failure, invalid response, app restart, interrupted operation, duplicate action, concurrent action, expired authentication, corrupted local state.
+
+Verify safe recovery.
+
+User Testing
+
+Use the application as a first-time customer. Is the next action obvious? Is anything confusing? Is feedback immediate? Are errors understandable? Can the primary task be completed without assistance?
+
+Fix the highest-impact usability problems.
+
+PHASE 7 — POLISH, PERFORMANCE & OPTIMIZATION
+
+Optimize only after correctness and security are established.
+
+Avoid unnecessary: dependencies, network calls, database operations, AI calls, background processes, memory/CPU usage, battery drain (mobile), large assets, rendering work.
+
+For mobile: optimize battery, memory, network constraints, intermittent connectivity, storage, background execution restrictions.
+
+For desktop: optimize CPU, RAM, GPU, startup time, resource leaks, background processes.
+
+Do not introduce microservices or complex infrastructure without strong justification.
+
+PHASE 8 — GIT, DEPENDENCIES & DOCUMENTATION
+Version Control
+Use GitHub as the source of truth.
+Create meaningful checkpoints before risky changes.
+Commit logical milestones.
+Verify incrementally; recover from broken changes rather than stacking more changes.
+Never commit secrets.
+Dependency Management
+Prefer mature, necessary dependencies.
+Review dependencies for obvious security/maintenance concerns.
+Before adding a dependency, determine whether existing platform/framework functionality is sufficient.
+Do not add large frameworks solely for convenience.
+Documentation
+
+Prepare a professional README containing:
+
+Problem, solution, target users, core workflow, key features
+Architecture, technology stack
+API/integration boundaries
+Database/data model where relevant
+Setup, environment variables, build/run/deployment instructions
+Security considerations, testing, known limitations
+Future website integration strategy
+
+Document only functionality that actually exists.
+
+DEMO RELIABILITY (HACKATHON CONTEXT)
+Make the primary demonstration deterministic.
+Prepare realistic demo data.
+Minimize dependence on unpredictable external services.
+Prevent accidental duplicate demo actions.
+Keep the primary feature available even if non-critical integrations fail.
+Make reset/recovery safe.
+Never create insecure demo shortcuts. Demo shortcuts must never become privilege bypasses.
+FINAL VERIFICATION GATES
+Security Audit Checklist
+ No hardcoded credentials in code
+ No default administrator password
+ No backdoor or debug bypass
+ No unauthorized endpoint
+ No insecure production configuration
+ No secrets committed to Git
+ No client-only authorization (authorization enforced server-side)
+ No direct unrestricted privileged database access
+ No obvious IDOR
+ No privilege escalation path
+ No unsafe file handling
+ No sensitive data in logs
+ No insecure test endpoint
+ No production dependency on development credentials
+Reliability Audit Checklist
+ Core workflow works repeatedly
+ Authentication works correctly
+ Authorization blocks unauthorized access
+ Data remains consistent
+ Failure states recover safely
+ Restart behavior is safe
+ Network failure is handled gracefully
+ Duplicate operations are controlled
+ Synchronization does not corrupt data
+ Application does not falsely report success
+ Production configuration works
+Completion Standard
+
+The software is complete only when:
+
+The core problem is genuinely solved.
+The primary workflow works end-to-end.
+Unauthorized access is blocked.
+User/resource authorization is verified server-side.
+Data integrity is protected.
+Expected failures are handled safely.
+The application has been tested as a real user.
+Security red-team testing has been performed and vulnerabilities fixed.
+The application is stable in its target environment.
+The architecture can later connect to the website through secure interfaces.
+Documentation matches the actual implementation.
+No known critical P0 issue remains.
+AGENT BEHAVIOR RULES
+
+You must:
+
+Inspect before modifying. Read existing code, database, configuration before making changes.
+Implement rather than explain. Build working software; do not stop at planning.
+Use available tools actively. Inspect, implement, test, and verify using GitHub, Supabase, Netlify, and MCP tools.
+Preserve working functionality. Do not rewrite working code unnecessarily.
+Prefer simple, reliable designs. Avoid unnecessary complexity.
+Fix discovered problems. Do not merely report vulnerabilities or issues; fix them.
+Verify claims before declaring success. Never claim "built," "secure," "working," "tested," or "complete" without actual verification.
+Never silently weaken a requirement. If you cannot meet a requirement, state it explicitly.
+Never create security shortcuts. No backdoors, hidden accounts, or emergency bypasses—not even for demo purposes.
+Never expose secrets. Never place service credentials, API keys, database passwords, or signing secrets in client code.
+Never trust client-side authorization. Always enforce authorization on the trusted side.
+Diagnose tool failures instead of blindly repeating them. If a tool call fails, understand why before retrying.
+Make reasonable autonomous decisions without unnecessary blocking questions. When requirements are sufficiently clear, choose the simplest secure implementation and continue.
+Maintain P0 ahead of P1/P2. Do not allow optional work to destabilize mandatory functionality.
+
+When ambiguity exists but does not materially affect security or product direction, choose the simplest secure option and continue.
+
+EXECUTION SEQUENCE
+
+Start now:
+
+Inspect → Understand → Choose architecture → Threat model → Design secure boundaries → Establish Git checkpoint → Build P0 core workflow → Implement authentication/authorization → Implement data layer → Implement integration boundary → Harden security → Test failure conditions → Red-team security testing → Improve UX → Optimize performance → Verify release configuration → Document → Final security audit → Final reliability audit → Ready for production/hackathon demo.
+
+Do not stop at planning. Build the working software.

@@ -1,0 +1,9 @@
+I'm going to participate on a hackathon where every tools are allowed ( including AIs ) and I have applied for building website. I want you to 
+
+Generate a pre-built prompt for my hackathon. The host has not declared themes so Keep it in a universal type format where actual idea, problem and solution should be like a parameter in [] format. I also have connected my Agentic AI framework to github, netlify and supabase through mcp.
+
+example:
+
+I'm going to build a website on a [theme] in hackathon, and I'm thinking of solving problem of [problem] using [idea]. You have all the necessary tools.
+
+Use creative skill to build a professional reliable website with user,admin,database and interactive UI/UNIX . The website must be simple and smooth for customer/users to use. The website must be secured from unauthorized access and secure from common and rare exploits with no back doors. 

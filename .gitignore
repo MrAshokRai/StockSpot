@@ -1,0 +1,29 @@
+# Dependencies (will be created by npm)
+node_modules/
+package-lock.json
+yarn.lock
+npm-debug.log*
+
+# Netlify configs - DO NOT COMMIT
+.netlify/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.local
+.DS_Store
+
+# Build outputs
+build/
+dist/
+out/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+npm-debug.log*
+yarn-error.log

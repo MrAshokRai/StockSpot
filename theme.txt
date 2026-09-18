@@ -1,0 +1,7 @@
+#	Theme	Focus Areas
+01	Cybersecurity, Privacy & Digital Trust	Threat detection, phishing & fraud, secure authentication, identity management, privacy-preserving apps
+02	HealthTech & Wellbeing	Symptom triage, health management platforms, preventive care, mental wellbeing, medical data visualization
+03	Future of Education & Skills	Personalized learning, smart tutoring, skill assessment, peer-learning platforms, career guidance
+04	Climate, Sustainability & Smart Cities	Waste management, energy optimization, air-quality monitoring, disaster preparedness, carbon tracking
+05	Livelihood & Local Commerce	Small-business tools, farmer & market platforms, gig-work matching, pricing & inventory, community marketplaces
+06	Smart Communities & Inclusive Tech	Local issue reporting, civic service access, emergency response, accessibility solutions, tools for underserved groups
