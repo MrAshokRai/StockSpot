@@ -1,10 +1,9 @@
-# Netlify configuration for Next.js deployment
+# Netlify configuration for Next.js (App Router) deployment
+# Uses @netlify/plugin-nextjs for proper SSR/SSG support
 
 [build]
   command = "npm run build"
   publish = ".next"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
