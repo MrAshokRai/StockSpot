@@ -1,17 +1,139 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0d9488;
-  --color-primary-dark: #0f766e;
-  --color-primary-light: #14b8a6;
-  --color-secondary: #6366f1;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-surface: #f8fafc;
-  --color-surface-dark: #0f172a;
+  /* APPLE DESIGN SYSTEM — Clean Light Luxury */
+  --color-primary: #0071e3;              /* Apple Blue */
+  --color-primary-dark: #0064d2;         /* Apple Blue hover */
+  --color-primary-light: var(--color-text); /* Use text color for subtle accents */
+  
+  --color-text: #1d1d1f;                 /* Apple primary text */
+  --color-text-secondary: rgba(0, 0, 0, 0.8);  /* Apple secondary */
+  --color-text-tertiary: rgba(0, 0, 0, 0.48);   /* Apple tertiary */
+  
+  --color-bg-light: #f5f5f7;             /* Apple light gray (not white) */
+  --color-bg-dark: #000000;              /* Pure black */
+  --color-surface: var(--color-text);    /* Override for dark mode */
+  --color-surface-dark: #272729;         /* Dark surface variant */
+  
+  --shadow-apple: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
 }
 
+/* APPLE OPTICAL SIZING & TYPOGRAPHY */
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: system-ui, -apple-system, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  letter-spacing: -0.374px;              /* Apple's tight tracking - signature trait */
+  line-height: 1.47;
+  
+  /* Alternating section backgrounds for cinematic rhythm */
+  background: var(--color-bg-light);
+}
+
+/* Section classes for alternating backgrounds */
+.section {
+  background: var(--color-bg-light);
+}
+
+.section.dark {
+  background: var(--color-bg-dark);
+  color: #ffffff;
+}
+
+/* Hero section - full bleed */
+.hero {
+  min-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  padding: 80px 20px;
+}
+
+/* Typography hierarchy with Apple tight line-heights */
+h1 {
+  font-size: clamp(40px, 5vw, 56px);      /* Optical sizing Display variant */
+  font-weight: 600;
+  line-height: 1.07;                       /* Extremely compressed for impact */
+}
+
+h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 600;
+  line-height: 1.14;
+}
+
+h3 {
+  font-size: clamp(21px, 3vw, 28px);
+  font-weight: 400;
+  line-height: 1.19;
+}
+
+/* Apple Button - Primary (Filled) */
+.btn-primary {
+  display: inline-block;
+  background: var(--color-primary);
+  color: #ffffff;
+  border: 1px solid transparent;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 17px;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+/* Apple Button - Outline (Learn More style) */
+.btn-outline {
+  display: inline-block;
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  padding: 8px 24px;
+  border-radius: 980px;                    /* Full pill shape */
+}
+
+.btn-outline:hover {
+  background: rgba(0, 102, 204, 0.08);    /* Subtle hover */
+}
+
+/* Product card styling */
+.product-card {
+  border-radius: 8px;
+  padding: 24px;
+  background: white;                       /* Always subtle, no harsh contrast */
+}
+
+/* Link styling - Apple Blue only */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Navigation glass effect */
+.nav-glass {
+  position: sticky;
+  top: 0;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  z-index: 1000;
+}
+
+/* Product card hover */
+.product-card:hover {
+  box-shadow: var(--shadow-apple);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  h1 { font-size: clamp(28px, 5vw, 40px); }
+  h2 { font-size: clamp(21px, 4vw, 28px); }
+  
+  .hero { padding: calc(100vh - 48px) 16px; }
+  .product-card { padding: 16px; }
 }

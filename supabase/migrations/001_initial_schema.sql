@@ -338,6 +338,7 @@ alter table demand_signals enable row level security;
 alter table product_requests enable row level security;
 alter table notifications enable row level security;
 alter table audit_logs enable row level security;
+-- [FIXED] Re-enabled with explicit public read policy
 alter table product_categories enable row level security;
 
 -- Profiles: users can read own, sellers can read customers who ordered from them
