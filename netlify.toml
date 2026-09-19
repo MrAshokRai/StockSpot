@@ -1,12 +1,6 @@
 # Netlify configuration for Next.js deployment
 
-# Build command used to generate production files
-[[build]]
+[build]
   command = "npm run build"
   publish = ".next"
-
-# SPA/SSR routing - redirect all routes to index.html
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+  
