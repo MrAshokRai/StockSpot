@@ -32,11 +32,11 @@ export default function AdminDashboardPage() {
       const [users, sellers, shops, verified, products, orders, pending, demand] = await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }),
         supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "seller"),
-        supabase.from("shops").select("*", { count: "exact", head: true }),
-        supabase.from("shops").select("*", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("merchant_branches").select("*", { count: "exact", head: true }),
+        supabase.from("merchant_branches").select("*", { count: "exact", head: true }),
         supabase.from("products").select("*", { count: "exact", head: true }),
         supabase.from("orders").select("*", { count: "exact", head: true }),
-        supabase.from("businesses").select("*", { count: "exact", head: true }).eq("verification_status", "pending"),
+        supabase.from("merchants").select("*", { count: "exact", head: true }).eq("verification_status", "pending"),
         supabase.from("demand_signals").select("*", { count: "exact", head: true }),
       ]);
 

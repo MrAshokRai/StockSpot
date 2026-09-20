@@ -64,33 +64,35 @@ export async function PUT(request: NextRequest) {
   const body = await request.json();
   const { action, entity_type, entity_id, data: actionData } = body;
 
-  // Log admin action
+  // Log admin action (canonical column: actor_id)
   await supabase.from("audit_logs").insert({
-    user_id: user.id,
+    actor_id: user.id,
     action,
     entity_type,
     entity_id: entity_id || null,
-    new_value: actionData || null,
+    details: actionData ? { data: actionData } : {},
   });
 
   if (entity_type === "business" && action === "verify") {
-    await supabase
-      .from("businesses")
-      .update({ verification_status: "verified", is_verified: true })
-      .eq("id", entity_id);
+    // Atomic RPC: updates merchants + profile seller_status (server-side, admin-only)
+    const { error: rpcError } = await supabase.rpc("approve_seller_application", { p_business_id: entity_id });
 
-    // Create notification for business owner
+    if (rpcError) {
+      return NextResponse.json({ error: rpcError.message }, { status: 500 });
+    }
+
+    // Create notification for the verified merchant's owner
     const { data: biz } = await supabase
-      .from("businesses")
-      .select("owner_id, name")
+      .from("merchants")
+      .select("user_id, business_name")
       .eq("id", entity_id)
       .single();
 
-    if (biz) {
+    if (biz?.user_id) {
       await supabase.from("notifications").insert({
-        user_id: (biz as { owner_id: string }).owner_id,
+        user_id: biz.user_id,
         title: "Business Verified",
-        message: `Your business "${(biz as { name: string }).name}" has been verified!`,
+        message: `Your business "${biz.business_name}" has been verified!`,
         type: "success",
       });
     }

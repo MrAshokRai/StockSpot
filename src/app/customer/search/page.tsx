@@ -153,18 +153,30 @@ function CustomerSearchContent() {
 
   const handleRequestProduct = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    supabase.from("product_requests").upsert(
-      {
-        query_text: query.trim(),
-        city: userLocation ? "current" : "unknown",
-        latitude: userLocation?.lat,
-        longitude: userLocation?.lng,
-        user_id: user?.id,
-        request_count: requestCount + 1,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "query_text,city" }
-    );
+    if (!user) {
+      router.push("/auth/login?redirect=/customer/search");
+      return;
+    }
+    // Secure RPC: increments count cross-user, owner set server-side (no client spoofing)
+    const { error } = await supabase.rpc("request_product", {
+      p_query_text: query.trim(),
+      p_city: userLocation ? "current" : "unknown",
+    });
+    if (error) {
+      // Fallback to direct insert (own row only per RLS)
+      supabase.from("product_requests").upsert(
+        {
+          user_id: user.id,
+          query_text: query.trim(),
+          city: userLocation ? "current" : "unknown",
+          latitude: userLocation?.lat,
+          longitude: userLocation?.lng,
+          request_count: 1,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "query_text,city" }
+      );
+    }
     setHasRequested(true);
     setRequestCount((c) => c + 1);
   };

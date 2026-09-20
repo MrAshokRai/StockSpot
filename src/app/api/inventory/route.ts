@@ -16,10 +16,10 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "inventory_item_id is required" }, { status: 400 });
   }
 
-  // Verify shop ownership
+  // Verify ownership via canonical chain: inventory_items.branch_id -> merchant_branches.merchant -> merchants.user_id
   const { data: item } = await supabase
     .from("inventory_items")
-    .select("id, shop_id, shops!inner(business_id, businesses!inner(owner_id))")
+    .select("id, branch_id, branch:merchant_branches!inner(merchant_id, merchant:merchants!inner(user_id))")
     .eq("id", inventory_item_id)
     .single();
 
@@ -27,8 +27,8 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const itemAny = item as unknown as { shops: { businesses: { owner_id: string }[] } };
-  if (itemAny.shops?.businesses?.[0]?.owner_id !== user.id) {
+  const itemAny = item as unknown as { branch: { merchant: { user_id: string } } };
+  if (itemAny.branch?.merchant?.user_id !== user.id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

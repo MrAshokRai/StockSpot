@@ -3,21 +3,21 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Check, X, Store, Search } from "lucide-react";
+import { Check, X, Store, Search } from "lucide-react";
 
 interface SellerData {
   id: string;
-  owner_id: string;
-  name: string;
+  user_id: string | null;
+  business_name: string;
+  business_registration_no: string | null;
   category: string;
-  phone: string;
+  contact_phone: string;
   verification_status: string;
   is_verified: boolean;
   trust_score: number;
   created_at: string;
-  owner: { full_name: string; email: string } | null;
+  owner: { full_name: string; email: string; seller_status?: string } | null;
 }
 
 export default function AdminSellersPage() {
@@ -27,36 +27,60 @@ export default function AdminSellersPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const supabase = createClient();
 
+  const fetchSellers = async () => {
+    const { data } = await supabase
+      .from("merchants")
+      .select("*, owner:profiles(full_name, email, seller_status)")
+      .order("created_at", { ascending: false });
+    setSellers((data as unknown as SellerData[]) || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchSellers = async () => {
-      const { data } = await supabase
-        .from("businesses")
-        .select("*, owner:profiles(full_name, email)")
-        .order("created_at", { ascending: false });
-      setSellers((data as unknown as SellerData[]) || []);
-      setLoading(false);
-    };
     fetchSellers();
   }, []);
 
-  const handleVerification = async (bizId: string, status: "verified" | "rejected") => {
-    await supabase
-      .from("businesses")
-      .update({ verification_status: status, is_verified: status === "verified" })
-      .eq("id", bizId);
+  const handleVerification = async (seller: SellerData, status: "verified" | "rejected") => {
+    if (status === "verified") {
+      // Atomic RPC execution to update merchant + profile
+      const { error } = await supabase.rpc("approve_seller_application", { p_business_id: seller.id });
+      if (error) {
+        // Direct fallback update if RPC unavailable
+        await supabase
+          .from("merchants")
+          .update({ verification_status: "verified", verified_at: new Date().toISOString() })
+          .eq("id", seller.id);
+        if (seller.user_id) {
+          await supabase
+            .from("profiles")
+            .update({ seller_status: "seller_verified", role: "seller" })
+            .eq("id", seller.user_id);
+        }
+      }
+    } else {
+      const { error } = await supabase.rpc("reject_seller_application", { p_business_id: seller.id });
+      if (error) {
+        await supabase
+          .from("merchants")
+          .update({ verification_status: "rejected", verified_at: null, verified_by: null })
+          .eq("id", seller.id);
+        if (seller.user_id) {
+          await supabase
+            .from("profiles")
+            .update({ seller_status: "customer", role: "customer" })
+            .eq("id", seller.user_id);
+        }
+      }
+    }
 
-    setSellers((prev) =>
-      prev.map((s) =>
-        s.id === bizId
-          ? { ...s, verification_status: status, is_verified: status === "verified" }
-          : s
-      )
-    );
+    fetchSellers();
   };
 
   const filtered = sellers.filter((s) => {
-    const matchesSearch = s.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      (s.owner?.full_name && s.owner.full_name.toLowerCase().includes(searchFilter.toLowerCase()));
+    const matchesSearch =
+      s.business_name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      (s.owner?.full_name && s.owner.full_name.toLowerCase().includes(searchFilter.toLowerCase())) ||
+      (s.owner?.email && s.owner.email.toLowerCase().includes(searchFilter.toLowerCase()));
     const matchesStatus = filterStatus === "all" || s.verification_status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -85,7 +109,7 @@ export default function AdminSellersPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search sellers..."
+            placeholder="Search sellers by business or owner name/email..."
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
             className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm"
@@ -117,28 +141,35 @@ export default function AdminSellersPage() {
               <CardContent>
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center shrink-0">
                       <Store className="w-6 h-6 text-teal-600" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-gray-900">{seller.name}</h3>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold text-gray-900">{seller.business_name}</h3>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[seller.verification_status] || ""}`}>
                           {seller.verification_status}
                         </span>
+                        {seller.owner?.seller_status && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                            Status: {seller.owner.seller_status}
+                          </span>
+                        )}
                       </div>
-                      <p className="text-sm text-gray-600">{seller.owner?.full_name} &middot; {seller.owner?.email}</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        <span className="font-medium text-gray-900">Owner:</span> {seller.owner?.full_name || "N/A"} &middot; {seller.owner?.email || "N/A"}
+                      </p>
                       <p className="text-xs text-gray-500 mt-1">
-                        Category: {seller.category} &middot; Phone: {seller.phone} &middot; Trust: {(seller.trust_score * 100).toFixed(0)}%
+                        Category: {seller.category} &middot; Phone: {seller.contact_phone} &middot; Trust Score: {(seller.trust_score * 100).toFixed(0)}%
                       </p>
                     </div>
                   </div>
                   {seller.verification_status === "pending" && (
-                    <div className="flex gap-1">
-                      <Button size="sm" onClick={() => handleVerification(seller.id, "verified")}>
+                    <div className="flex gap-1 shrink-0">
+                      <Button size="sm" onClick={() => handleVerification(seller, "verified")}>
                         <Check className="w-3 h-3 mr-1" /> Verify
                       </Button>
-                      <Button size="sm" variant="danger" onClick={() => handleVerification(seller.id, "rejected")}>
+                      <Button size="sm" variant="danger" onClick={() => handleVerification(seller, "rejected")}>
                         <X className="w-3 h-3" />
                       </Button>
                     </div>

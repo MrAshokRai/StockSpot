@@ -32,6 +32,7 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // Unauthenticated users cannot access protected areas
   if (!user && (pathname.startsWith("/customer") || pathname.startsWith("/seller") || pathname.startsWith("/admin"))) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
@@ -42,16 +43,30 @@ export async function updateSession(request: NextRequest) {
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, seller_status")
       .eq("id", user.id)
       .single();
 
     if (profile) {
-      if (pathname.startsWith("/seller") && profile.role !== "seller" && profile.role !== "admin") {
+      // /seller/apply is accessible to any authenticated user (to submit application)
+      if (pathname.startsWith("/seller/apply") || pathname.startsWith("/seller/pending")) {
+        // Allow all authenticated users — no role check needed
+        return supabaseResponse;
+      }
+
+      // /seller/* (dashboard, products, inventory, orders, demand, settings)
+      // requires seller_verified OR admin
+      if (
+        pathname.startsWith("/seller") &&
+        profile.seller_status !== "seller_verified" &&
+        profile.role !== "admin"
+      ) {
         const url = request.nextUrl.clone();
-        url.pathname = "/auth/register";
+        url.pathname = "/customer/search";
         return NextResponse.redirect(url);
       }
+
+      // /admin/* requires admin role
       if (pathname.startsWith("/admin") && profile.role !== "admin") {
         const url = request.nextUrl.clone();
         url.pathname = "/";

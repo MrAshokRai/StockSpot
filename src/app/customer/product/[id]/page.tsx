@@ -25,6 +25,7 @@ import {
 interface ProductDetail {
   inventory_item_id: string;
   product_id: string;
+  merchant_id: string;
   product_name: string;
   brand: string | null;
   model: string | null;
@@ -83,23 +84,43 @@ export default function ProductDetailPage() {
       router.push("/auth/login?redirect=/customer/product/" + inventoryId);
       return;
     }
+    if (!product) {
+      setReserving(false);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, phone")
+      .eq("id", user.id)
+      .single();
 
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    const totalPrice = product.price * reserveQty;
 
-    const { error } = await supabase.from("reservations").insert({
+    const { data: reservation, error } = await supabase.from("reservations").insert({
       customer_id: user.id,
-      shop_id: product!.shop_id,
-      inventory_item_id: product!.inventory_item_id,
+      merchant_id: product.merchant_id,
+      branch_id: product.shop_id,
+      inventory_item_id: product.inventory_item_id,
+      customer_name: profile?.full_name || "Customer",
+      customer_phone: profile?.phone || "",
+      customer_email: user.email ?? null,
       quantity: reserveQty,
+      total_price: totalPrice,
+      pickup_code: Math.random().toString(36).slice(2, 8).toUpperCase(),
       expires_at: expiresAt,
-    });
+    }).select("pickup_code").single();
 
     if (!error) {
-      await supabase
-        .from("inventory_items")
-        .update({ reserved_quantity: product!.reserved_quantity + reserveQty })
-        .eq("id", product!.inventory_item_id);
+      await supabase.rpc("increment_reserved", {
+        p_id: product.inventory_item_id,
+        p_qty: reserveQty,
+      });
 
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("pickup_code", (reservation as { pickup_code: string } | null)?.pickup_code ?? "");
+      }
       setReserved(true);
     }
     setReserving(false);

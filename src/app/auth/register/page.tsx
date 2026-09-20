@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -6,7 +6,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { Store } from "lucide-react";
 
 export default function RegisterPage() {
@@ -16,7 +15,6 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "customer" as "customer" | "seller",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,7 +43,7 @@ export default function RegisterPage() {
       options: {
         data: {
           full_name: formData.fullName,
-          role: formData.role,
+          // role intentionally omitted — server trigger always creates as 'customer'
         },
       },
     });
@@ -57,11 +55,7 @@ export default function RegisterPage() {
     }
 
     if (data.user) {
-      if (formData.role === "seller") {
-        router.push("/seller/onboarding");
-      } else {
-        router.push("/customer/search");
-      }
+      router.push("/customer/search");
     }
   };
 
@@ -121,15 +115,6 @@ export default function RegisterPage() {
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               required
-            />
-            <Select
-              label="I want to"
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value as "customer" | "seller" })}
-              options={[
-                { value: "customer", label: "Find products (Customer)" },
-                { value: "seller", label: "Sell products (Seller)" },
-              ]}
             />
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? "Creating account..." : "Create account"}

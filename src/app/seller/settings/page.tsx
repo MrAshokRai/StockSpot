@@ -21,11 +21,17 @@ export default function SellerSettingsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: biz } = await supabase.from("businesses").select("*").eq("owner_id", user.id).single();
+      const { data: biz } = await supabase.from("merchants").select("id, business_name, description, verification_status").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
       if (!biz) { setLoading(false); return; }
-      setBusiness(biz);
+      setBusiness(biz ? {
+        name: biz.business_name,
+        description: biz.description || "",
+        phone: "",
+        email: "",
+        verification_status: biz.verification_status,
+      } : null);
 
-      const { data: s } = await supabase.from("shops").select("*").eq("business_id", biz.id).single();
+      const { data: s } = await supabase.from("shops").select("*").eq("business_id", biz.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
       setShop(s);
       setLoading(false);
     };

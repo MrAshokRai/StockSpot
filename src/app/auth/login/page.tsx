@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -37,16 +37,24 @@ function LoginForm() {
     if (data.user) {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("role")
+        .select("role, seller_status")
         .eq("id", data.user.id)
         .single();
 
       if (profile?.role === "admin") {
         router.push("/admin");
-      } else if (profile?.role === "seller") {
-        router.push("/seller/dashboard");
+      } else if (profile?.seller_status === "seller_verified") {
+        const savedMode = typeof window !== "undefined"
+          ? (localStorage.getItem(`mode_${data.user.id}`) || localStorage.getItem("mode"))
+          : null;
+        if (savedMode === "customer") {
+          router.push("/customer/search");
+        } else {
+          router.push("/seller/dashboard");
+        }
       } else {
-        router.push(redirect);
+        // Customers and seller_pending go to customer search
+        router.push("/customer/search");
       }
     }
   };

@@ -44,23 +44,23 @@ export default function SellerOrdersPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: biz } = await supabase.from("businesses").select("id").eq("owner_id", user.id).single();
+      const { data: biz } = await supabase.from("merchants").select("id").eq("user_id", user.id).single();
       if (!biz) { setLoading(false); return; }
 
-      const { data: shops } = await supabase.from("shops").select("id").eq("business_id", biz.id);
-      const shopIds = (shops || []).map((s: { id: string }) => s.id);
-      if (shopIds.length === 0) { setLoading(false); return; }
+      const { data: shops } = await supabase.from("merchant_branches").select("id").eq("merchant_id", biz.id);
+      const branchIds = (shops || []).map((s: { id: string }) => s.id);
+      if (branchIds.length === 0) { setLoading(false); return; }
 
       const { data: orderData } = await supabase
         .from("orders")
-        .select("*, customer:profiles(full_name, email), items:order_items(id, product(name), quantity, unit_price)")
-        .in("shop_id", shopIds)
+        .select("*, customer:profiles(full_name, email), items:order_items(id, product:products(name), quantity, unit_price)")
+        .in("branch_id", branchIds)
         .order("created_at", { ascending: false });
 
       const { data: resData } = await supabase
         .from("reservations")
-        .select("*, customer:profiles(full_name), product(name), shop(name)")
-        .in("shop_id", shopIds)
+        .select("*, customer:profiles(full_name), product:products(name), branch:merchant_branches(name)")
+        .in("branch_id", branchIds)
         .order("created_at", { ascending: false });
 
       setOrders(((orderData || []) as unknown as Record<string, unknown>[]).map((o) => ({
@@ -77,7 +77,7 @@ export default function SellerOrdersPage() {
         ...r,
         customer: Array.isArray(r.customer) ? r.customer[0] : r.customer,
         product: Array.isArray(r.product) ? r.product[0] : r.product,
-        shop: Array.isArray(r.shop) ? r.shop[0] : r.shop,
+        shop: Array.isArray(r.branch) ? r.branch[0] : r.branch,
       })) as unknown as ReservationData[]);
       setLoading(false);
     };

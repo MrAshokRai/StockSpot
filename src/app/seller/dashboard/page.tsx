@@ -1,27 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatCurrency, getTimeAgo, getDemandGapLabel } from "@/lib/helpers";
 import {
   Package,
   ShoppingBag,
-  TrendingUp,
   AlertTriangle,
   Clock,
   Store,
   ArrowRight,
-  DollarSign,
-  BarChart3,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 
 interface ShopData {
   id: string;
-  name: string;
-  business_id: string;
+  branch_name: string;
+  merchant_id: string;
 }
 
 interface DashboardStats {
@@ -57,7 +57,17 @@ interface RecentOrder {
 }
 
 export default function SellerDashboardPage() {
+  const router = useRouter();
   const [shop, setShop] = useState<ShopData | null>(null);
+
+  const handleSwitchToCustomer = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      localStorage.setItem(`mode_${user.id}`, "customer");
+    }
+    localStorage.setItem("mode", "customer");
+    router.push("/customer/search");
+  };
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0, lowStockProducts: 0, pendingOrders: 0,
     pendingReservations: 0, todaySales: 0, inventoryValue: 0, demandOpportunities: 0,
@@ -73,36 +83,36 @@ export default function SellerDashboardPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: businesses } = await supabase
-        .from("businesses")
+      const { data: merchants } = await supabase
+        .from("merchants")
         .select("id")
-        .eq("owner_id", user.id);
+        .eq("user_id", user.id);
 
-      if (!businesses || businesses.length === 0) {
+      if (!merchants || merchants.length === 0) {
         setLoading(false);
         return;
       }
 
-      const bizIds = businesses.map((b: { id: string }) => b.id);
-      const { data: shops } = await supabase
-        .from("shops")
-        .select("id, name, business_id")
-        .in("business_id", bizIds);
+      const merchantIds = merchants.map((m: { id: string }) => m.id);
+      const { data: branches } = await supabase
+        .from("merchant_branches")
+        .select("id, branch_name, merchant_id")
+        .in("merchant_id", merchantIds);
 
-      if (!shops || shops.length === 0) {
+      if (!branches || branches.length === 0) {
         setLoading(false);
         return;
       }
 
-      const shopIds = shops.map((s: { id: string }) => s.id);
-      const currentShop = shops[0] as ShopData;
-      setShop(currentShop);
+      const branchIds = branches.map((b: { id: string }) => b.id);
+      const currentBranch = branches[0] as ShopData;
+      setShop(currentBranch);
 
       // Inventory stats
       const { data: inventory } = await supabase
         .from("inventory_items")
-        .select("id, quantity, price, last_updated, product(name)")
-        .in("shop_id", shopIds);
+        .select("id, quantity, price, last_updated, product:products(name)")
+        .in("branch_id", branchIds);
 
       const inv = (inventory || []) as unknown as Record<string, unknown>[];
       const totalProducts = inv.length;
@@ -118,8 +128,8 @@ export default function SellerDashboardPage() {
       // Pending orders
       const { data: orders } = await supabase
         .from("orders")
-        .select("id, total_amount, status, created_at, customer:profiles(full_name), items:order_items(quantity, product(name))")
-        .in("shop_id", shopIds)
+        .select("id, total_amount, status, created_at, customer:profiles(full_name), items:order_items(quantity, product:products(name))")
+        .in("branch_id", branchIds)
         .order("created_at", { ascending: false })
         .limit(5);
 
@@ -129,11 +139,11 @@ export default function SellerDashboardPage() {
       const { count: pendingRes } = await supabase
         .from("reservations")
         .select("*", { count: "exact", head: true })
-        .in("shop_id", shopIds)
+        .in("branch_id", branchIds)
         .eq("status", "active");
 
       // Demand opportunities from city
-      const city = currentShop.name ? "Kathmandu" : "unknown";
+      const city = currentBranch.branch_name ? "Kathmandu" : "unknown";
       const { data: demand } = await supabase
         .from("v_demand_summary")
         .select("*")
@@ -177,14 +187,20 @@ export default function SellerDashboardPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Seller Dashboard</h1>
-          {shop && <p className="text-sm text-gray-600">{shop.name}</p>}
+          {shop && <p className="text-sm text-gray-600">{shop.branch_name}</p>}
         </div>
-        <Link href="/seller/inventory">
-          <Badge variant="info" size="md">
-            <Store className="w-4 h-4 mr-1" />
-            Manage Inventory
-          </Badge>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleSwitchToCustomer}>
+            <User className="w-4 h-4 mr-1.5" />
+            Switch to Customer Mode
+          </Button>
+          <Link href="/seller/inventory">
+            <Badge variant="info" size="md">
+              <Store className="w-4 h-4 mr-1" />
+              Manage Inventory
+            </Badge>
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">

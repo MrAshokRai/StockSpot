@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
   Search,
@@ -16,12 +17,16 @@ import {
   X,
   Bell,
   ShieldCheck,
+  Clock,
+  ArrowRightLeft,
 } from "lucide-react";
 import type { Profile } from "@/types";
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [mode, setMode] = useState<"customer" | "seller">("customer");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const supabase = createClient();
@@ -35,11 +40,26 @@ export function Navbar() {
           .select("*")
           .eq("id", user.id)
           .single();
-        setProfile(data);
+        if (data) {
+          setProfile(data);
+          // Set mode according to seller_status & current route / localStorage
+          if (data.seller_status === "seller_verified") {
+            if (pathname.startsWith("/seller")) {
+              setMode("seller");
+            } else if (pathname.startsWith("/customer")) {
+              setMode("customer");
+            } else {
+              const saved = localStorage.getItem(`mode_${data.id}`) || localStorage.getItem("mode");
+              setMode(saved === "customer" ? "customer" : "seller");
+            }
+          } else {
+            setMode("customer");
+          }
+        }
       }
     };
     getUser();
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     if (!profile) return;
@@ -62,6 +82,24 @@ export function Navbar() {
     window.location.href = "/";
   };
 
+  const handleSwitchMode = (targetMode: "customer" | "seller") => {
+    if (profile) {
+      localStorage.setItem(`mode_${profile.id}`, targetMode);
+    }
+    localStorage.setItem("mode", targetMode);
+    setMode(targetMode);
+    if (targetMode === "seller") {
+      router.push("/seller/dashboard");
+    } else {
+      router.push("/customer/search");
+    }
+  };
+
+  // Determine nav links based on role & mode
+  const isSellerVerified = profile?.seller_status === "seller_verified";
+  const isSellerPending = profile?.seller_status === "seller_pending";
+  const isCustomer = profile?.seller_status === "customer";
+
   const navLinks = profile
     ? profile.role === "admin"
       ? [
@@ -70,7 +108,7 @@ export function Navbar() {
           { href: "/admin/sellers", label: "Sellers", icon: Store },
           { href: "/admin/analytics", label: "Analytics", icon: LayoutDashboard },
         ]
-      : profile.role === "seller"
+      : mode === "seller" && isSellerVerified
       ? [
           { href: "/seller/dashboard", label: "Dashboard", icon: LayoutDashboard },
           { href: "/seller/products", label: "Products", icon: Store },
@@ -120,7 +158,49 @@ export function Navbar() {
             })}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {profile && profile.role !== "admin" && (
+              <div className="hidden md:flex items-center gap-2">
+                {isSellerVerified && mode === "customer" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSwitchMode("seller")}
+                    className="text-xs font-medium flex items-center gap-1.5"
+                  >
+                    <ArrowRightLeft className="w-3.5 h-3.5" />
+                    Switch to Seller Mode
+                  </Button>
+                )}
+                {isSellerVerified && mode === "seller" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSwitchMode("customer")}
+                    className="text-xs font-medium flex items-center gap-1.5"
+                  >
+                    <ArrowRightLeft className="w-3.5 h-3.5" />
+                    Switch to Customer Mode
+                  </Button>
+                )}
+                {isSellerPending && (
+                  <Link href="/seller/pending">
+                    <Badge variant="warning" size="sm">
+                      <Clock className="w-3 h-3 mr-1 inline-block" />
+                      Seller Application Pending
+                    </Badge>
+                  </Link>
+                )}
+                {isCustomer && (
+                  <Link href="/seller/apply">
+                    <Button size="sm" variant="outline" className="text-xs font-medium">
+                      Become a Seller
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            )}
+
             {profile ? (
               <>
                 <div className="relative hidden md:block">
@@ -162,6 +242,48 @@ export function Navbar() {
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-200 bg-white">
           <div className="px-4 py-3 space-y-1">
+            {profile && profile.role !== "admin" && (
+              <div className="pb-2 mb-2 border-b border-gray-100">
+                {isSellerVerified && mode === "customer" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => { setMobileOpen(false); handleSwitchMode("seller"); }}
+                    className="w-full text-xs font-medium flex items-center justify-center gap-1.5"
+                  >
+                    <ArrowRightLeft className="w-3.5 h-3.5" />
+                    Switch to Seller Mode
+                  </Button>
+                )}
+                {isSellerVerified && mode === "seller" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => { setMobileOpen(false); handleSwitchMode("customer"); }}
+                    className="w-full text-xs font-medium flex items-center justify-center gap-1.5"
+                  >
+                    <ArrowRightLeft className="w-3.5 h-3.5" />
+                    Switch to Customer Mode
+                  </Button>
+                )}
+                {isSellerPending && (
+                  <Link href="/seller/pending" onClick={() => setMobileOpen(false)}>
+                    <div className="p-2 bg-yellow-50 text-yellow-800 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                      <Clock className="w-4 h-4" />
+                      Seller Application Pending
+                    </div>
+                  </Link>
+                )}
+                {isCustomer && (
+                  <Link href="/seller/apply" onClick={() => setMobileOpen(false)}>
+                    <Button size="sm" variant="outline" className="w-full text-xs font-medium">
+                      Become a Seller
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            )}
+
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
@@ -182,6 +304,7 @@ export function Navbar() {
                 </Link>
               );
             })}
+
             {profile ? (
               <button
                 onClick={handleLogout}

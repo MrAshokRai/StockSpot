@@ -10,10 +10,10 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { shop_id, items, fulfillment_type, notes, delivery_address } = body;
+  const { branch_id, items, fulfillment_type, notes, delivery_address } = body;
 
-  if (!shop_id || !items || items.length === 0) {
-    return NextResponse.json({ error: "shop_id and items are required" }, { status: 400 });
+  if (!branch_id || !items || items.length === 0) {
+    return NextResponse.json({ error: "branch_id and items are required" }, { status: 400 });
   }
 
   let totalAmount = 0;
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     .from("orders")
     .insert({
       customer_id: user.id,
-      shop_id,
+      branch_id,
       fulfillment_type: fulfillment_type || "pickup",
       total_amount: totalAmount,
       notes: notes || null,
@@ -86,21 +86,21 @@ export async function GET(request: NextRequest) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, seller_status")
     .eq("id", user.id)
     .single();
 
-  if (profile?.role === "seller") {
-    // Get shop IDs for this seller
-    const { data: biz } = await supabase.from("businesses").select("id").eq("owner_id", user.id);
+  if (profile?.seller_status === "seller_verified") {
+    // Get branch IDs for this seller (via canonical merchants -> merchant_branches)
+    const { data: biz } = await supabase.from("merchants").select("id").eq("user_id", user.id);
     const bizIds = (biz || []).map((b: { id: string }) => b.id);
-    const { data: shops } = await supabase.from("shops").select("id").in("business_id", bizIds);
-    const shopIds = (shops || []).map((s: { id: string }) => s.id);
+    const { data: shops } = await supabase.from("merchant_branches").select("id").in("merchant_id", bizIds);
+    const branchIds = (shops || []).map((s: { id: string }) => s.id);
 
     const { data: orders } = await supabase
       .from("orders")
-      .select("*, customer:profiles(full_name), items:order_items(*, product(name))")
-      .in("shop_id", shopIds)
+      .select("*, customer:profiles(full_name), items:order_items(*, product:products(name))")
+      .in("branch_id", branchIds)
       .order("created_at", { ascending: false });
 
     return NextResponse.json({ orders });
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
   // Customer
   const { data: orders } = await supabase
     .from("orders")
-    .select("*, shop(name, business(name)), items:order_items(*, product(name))")
+    .select("*, branch:merchant_branches(name, merchant:merchants(business_name)), items:order_items(*, product:products(name))")
     .eq("customer_id", user.id)
     .order("created_at", { ascending: false });
 

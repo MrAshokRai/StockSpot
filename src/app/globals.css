@@ -77,11 +77,32 @@ h3 {
   padding: 8px 20px;
   border-radius: 8px;
   font-size: 17px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .btn-primary:hover {
   background: var(--color-primary-dark);
 }
+/* Pressed state - a step darker than hover */
+.btn-primary:active {
+  background: color-mix(in srgb, var(--color-primary) 85%, black);
+}
+
+/* Keyboard focus ring - system accent */
+.btn-primary:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Disabled - base background re-asserted so :hover can't win */
+.btn-primary:disabled {
+  background: var(--color-primary);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 
 /* Apple Button - Outline (Learn More style) */
 .btn-outline {
@@ -90,12 +111,34 @@ h3 {
   color: var(--color-primary);
   border: 1px solid var(--color-primary);
   padding: 8px 24px;
+  font-size: 17px;                         /* Match .btn-primary sizing */
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
   border-radius: 980px;                    /* Full pill shape */
 }
 
 .btn-outline:hover {
   background: rgba(0, 102, 204, 0.08);    /* Subtle hover */
 }
+/* Pressed state - deepens the existing hover tint */
+.btn-outline:active {
+  background: rgba(0, 102, 204, 0.14);
+}
+
+/* Keyboard focus ring - system accent */
+.btn-outline:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Disabled - base background re-asserted so :hover can't win */
+.btn-outline:disabled {
+  background: transparent;
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 
 /* Product card styling */
 .product-card {
@@ -104,14 +147,19 @@ h3 {
   background: white;                       /* Always subtle, no harsh contrast */
 }
 
-/* Link styling - Apple Blue only */
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-}
+/* Link styling - Apple Blue only. Lives in @layer base (below Tailwind's
+   utilities layer) so anchors that set their own text color via utility
+   classes render it; unlayered rules beat all utilities, which forced
+   every link to render Apple Blue regardless of its classes. */
+@layer base {
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
 
-a:hover {
-  text-decoration: underline;
+  a:hover {
+    text-decoration: underline;
+  }
 }
 
 /* Navigation glass effect */

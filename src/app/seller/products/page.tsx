@@ -33,16 +33,23 @@ export default function SellerProductsPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: merchant } = await supabase.from("merchants").select("id").eq("user_id", user.id).single();
+      if (!merchant) return;
+
       const { data: prods } = await supabase
         .from("products")
         .select("*")
+        .eq("merchant_id", merchant.id)
         .order("created_at", { ascending: false });
       setProducts((prods as ProductData[]) || []);
 
       const { data: cats } = await supabase
-        .from("product_categories")
+        .from("categories")
         .select("id, name")
-        .order("sort_order");
+        .order("name");
       setCategories((cats || []) as { id: string; name: string }[]);
       setLoading(false);
     };
@@ -51,6 +58,16 @@ export default function SellerProductsPage() {
 
   const handleAddProduct = async () => {
     if (!newProd.name) return;
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    
+    const { data: merchant } = await supabase.from("merchants").select("id").eq("user_id", user.id).single();
+    if (!merchant) return;
+    
+    const { data: branch } = await supabase.from("merchant_branches").select("id").eq("merchant_id", merchant.id).single();
+    if (!branch) return;
+
     const normalizedName = newProd.name.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
     const { data, error } = await supabase
       .from("products")
@@ -64,6 +81,8 @@ export default function SellerProductsPage() {
         sku: newProd.sku || null,
         category_id: selectedCategory || null,
         unit: "piece",
+        merchant_id: merchant.id,
+        branch_id: branch.id,
       }, { onConflict: "slug" })
       .select()
       .single();

@@ -1,10 +1,12 @@
 export type UserRole = "customer" | "seller" | "admin";
+export type SellerStatus = "customer" | "seller_pending" | "seller_verified";
 
 export interface Profile {
   id: string;
   email: string;
   full_name: string;
   role: UserRole;
+  seller_status: SellerStatus;
   phone?: string;
   avatar_url?: string;
   created_at: string;

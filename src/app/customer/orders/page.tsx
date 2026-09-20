@@ -13,7 +13,7 @@ interface OrderData {
   fulfillment_type: string;
   total_amount: number;
   created_at: string;
-  shop: { name: string; business: { name: string } } | null;
+  branch: { name: string; merchant: { business_name: string } } | null;
   items: { product: { name: string }; quantity: number; unit_price: number }[] | null;
 }
 
@@ -24,7 +24,7 @@ interface ReservationData {
   expires_at: string;
   created_at: string;
   product: { name: string; brand: string } | null;
-  shop: { name: string; city: string } | null;
+  branch: { name: string; city: string } | null;
 }
 
 export default function CustomerOrdersPage() {
@@ -41,18 +41,18 @@ export default function CustomerOrdersPage() {
 
       const { data: orderData } = await supabase
         .from("orders")
-        .select("*, shop(name, business(name)), items(product(name), quantity, unit_price)")
+        .select("*, branch:merchant_branches(name, merchant:merchants(business_name)), items:order_items(product:products(name), quantity, unit_price)")
         .eq("customer_id", user.id)
         .order("created_at", { ascending: false });
 
       const { data: resData } = await supabase
         .from("reservations")
-        .select("*, product(name, brand), shop(name, city)")
+        .select("*, product:products(name, brand), branch:merchant_branches(name, city)")
         .eq("customer_id", user.id)
         .order("created_at", { ascending: false });
 
       setOrders((orderData as OrderData[]) || []);
-      setReservations((resData as ReservationData[]) || []);
+      setReservations((resData as unknown as ReservationData[]) || []);
       setLoading(false);
     };
     fetchData();
@@ -118,7 +118,7 @@ export default function CustomerOrdersPage() {
                         </span>
                       </div>
                       <p className="text-sm text-gray-500 mt-1">
-                        {order.shop?.name || "Shop"} &middot; {order.fulfillment_type}
+                        {order.branch?.name || "Shop"} &middot; {order.fulfillment_type}
                       </p>
                     </div>
                     <div className="text-right">
@@ -167,7 +167,7 @@ export default function CustomerOrdersPage() {
                       </div>
                       <p className="text-sm text-gray-500 mt-1">
                         <Store className="w-3 h-3 inline mr-1" />
-                        {res.shop?.name || "Shop"} &middot; Qty: {res.quantity}
+                        {res.branch?.name || "Shop"} &middot; Qty: {res.quantity}
                       </p>
                     </div>
                     <div className="text-right">
