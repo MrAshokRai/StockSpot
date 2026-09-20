@@ -190,6 +190,14 @@ export default function SellerDashboardPage() {
           {shop && <p className="text-sm text-gray-600">{shop.branch_name}</p>}
         </div>
         <div className="flex items-center gap-2">
+          {shop && (
+            <Link href={`/customer/shop/${shop.id}`} target="_blank">
+              <Button variant="outline" size="sm" className="text-teal-700 border-teal-200 hover:bg-teal-50">
+                <Store className="w-4 h-4 mr-1.5" />
+                View Public Storefront
+              </Button>
+            </Link>
+          )}
           <Button variant="outline" size="sm" onClick={handleSwitchToCustomer}>
             <User className="w-4 h-4 mr-1.5" />
             Switch to Customer Mode

@@ -6,9 +6,10 @@ interface BadgeProps {
   children: React.ReactNode;
   variant?: "default" | "success" | "warning" | "danger" | "info" | "outline";
   size?: "sm" | "md";
+  className?: string;
 }
 
-function Badge({ children, variant = "default", size = "sm" }: BadgeProps) {
+function Badge({ children, variant = "default", size = "sm", className }: BadgeProps) {
   return (
     <span
       className={cn(
@@ -24,7 +25,8 @@ function Badge({ children, variant = "default", size = "sm" }: BadgeProps) {
         {
           "px-2 py-0.5 text-xs": size === "sm",
           "px-3 py-1 text-sm": size === "md",
-        }
+        },
+        className
       )}
     >
       {children}

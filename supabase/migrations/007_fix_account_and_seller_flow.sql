@@ -227,7 +227,20 @@ BEGIN
       updated_at = now()
   WHERE id = p_user_id;
 END;
-$$;
+-- 8. Products price default and merchant management RLS
+ALTER TABLE public.products ALTER COLUMN price SET DEFAULT 0;
+ALTER TABLE public.products ALTER COLUMN price DROP NOT NULL;
 
-GRANT EXECUTE ON FUNCTION public.set_user_role(uuid, public.user_role) TO authenticated;
+DROP POLICY IF EXISTS "Merchant owners can update own products" ON public.products;
+CREATE POLICY "Merchant owners can update own products"
+  ON public.products FOR UPDATE
+  TO authenticated
+  USING (EXISTS (SELECT 1 FROM merchants m WHERE m.id = products.merchant_id AND m.user_id = auth.uid()))
+  WITH CHECK (EXISTS (SELECT 1 FROM merchants m WHERE m.id = products.merchant_id AND m.user_id = auth.uid()));
+
+DROP POLICY IF EXISTS "Merchant owners can delete own products" ON public.products;
+CREATE POLICY "Merchant owners can delete own products"
+  ON public.products FOR DELETE
+  TO authenticated
+  USING (EXISTS (SELECT 1 FROM merchants m WHERE m.id = products.merchant_id AND m.user_id = auth.uid()));
 

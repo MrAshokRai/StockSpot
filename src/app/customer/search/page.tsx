@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -307,9 +307,11 @@ function CustomerSearchContent() {
                             <Store className="w-4 h-4 text-gray-400" />
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="font-medium text-sm text-gray-900">
-                                  {item.shop_name}
-                                </span>
+                                <Link href={`/customer/shop/${item.shop_id}`}>
+                                  <span className="font-medium text-sm text-gray-900 hover:text-teal-600 hover:underline">
+                                    {item.shop_name}
+                                  </span>
+                                </Link>
                                 <SellerBadge isVerified={item.is_verified} showLabel={false} />
                               </div>
                               <div className="flex items-center gap-2 text-xs text-gray-500">

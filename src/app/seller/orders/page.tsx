@@ -44,7 +44,7 @@ export default function SellerOrdersPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: biz } = await supabase.from("merchants").select("id").eq("user_id", user.id).single();
+      const { data: biz } = await supabase.from("merchants").select("id").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
       if (!biz) { setLoading(false); return; }
 
       const { data: shops } = await supabase.from("merchant_branches").select("id").eq("merchant_id", biz.id);

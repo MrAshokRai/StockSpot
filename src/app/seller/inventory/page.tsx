@@ -50,10 +50,22 @@ export default function SellerInventoryPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: merchant } = await supabase.from("merchants").select("id").eq("user_id", user.id).single();
+      const { data: merchant } = await supabase
+        .from("merchants")
+        .select("id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
       if (!merchant) { setLoading(false); return; }
 
-      const { data: branch } = await supabase.from("merchant_branches").select("id").eq("merchant_id", merchant.id).single();
+      const { data: branch } = await supabase
+        .from("merchant_branches")
+        .select("id")
+        .eq("merchant_id", merchant.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
       if (!branch) { setLoading(false); return; }
 
       setShopId(branch.id);
@@ -105,7 +117,13 @@ export default function SellerInventoryPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data: merchant } = await supabase.from("merchants").select("id").eq("user_id", user.id).single();
+    const { data: merchant } = await supabase
+      .from("merchants")
+      .select("id")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
     if (!merchant) return;
 
     const normalizedName = newProduct.name.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
@@ -117,6 +135,8 @@ export default function SellerInventoryPage() {
         slug: newProduct.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
         normalized_name: normalizedName,
         search_keywords: [normalizedName],
+        price: newProduct.price || 0,
+        stock_quantity: newProduct.quantity || 0,
         unit: "piece",
         merchant_id: merchant.id,
         branch_id: shopId,
@@ -126,16 +146,20 @@ export default function SellerInventoryPage() {
 
     if (prodError || !product) return;
 
-    await supabase.from("inventory_items").upsert({
-      product_id: product.id,
-      branch_id: shopId,
-      quantity: newProduct.quantity,
-      price: newProduct.price,
-      last_updated: new Date().toISOString(),
-    }, { onConflict: "product_id,branch_id" });
+    const { data: invItem } = await supabase
+      .from("inventory_items")
+      .upsert({
+        product_id: product.id,
+        branch_id: shopId,
+        quantity: newProduct.quantity,
+        price: newProduct.price,
+        last_updated: new Date().toISOString(),
+      }, { onConflict: "product_id,branch_id" })
+      .select()
+      .single();
 
     setInventory((prev) => [{
-      id: "new",
+      id: invItem?.id || product.id,
       product_id: product.id,
       product_name: newProduct.name,
       brand: null,

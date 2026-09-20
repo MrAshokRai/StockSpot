@@ -36,7 +36,13 @@ export default function SellerProductsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: merchant } = await supabase.from("merchants").select("id").eq("user_id", user.id).single();
+      const { data: merchant } = await supabase
+        .from("merchants")
+        .select("id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
       if (!merchant) return;
 
       const { data: prods } = await supabase
@@ -62,10 +68,22 @@ export default function SellerProductsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     
-    const { data: merchant } = await supabase.from("merchants").select("id").eq("user_id", user.id).single();
+    const { data: merchant } = await supabase
+      .from("merchants")
+      .select("id")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
     if (!merchant) return;
     
-    const { data: branch } = await supabase.from("merchant_branches").select("id").eq("merchant_id", merchant.id).single();
+    const { data: branch } = await supabase
+      .from("merchant_branches")
+      .select("id")
+      .eq("merchant_id", merchant.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
     if (!branch) return;
 
     const normalizedName = newProd.name.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();

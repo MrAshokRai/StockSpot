@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -102,9 +103,10 @@ export default function ProductDetailPage() {
       customer_id: user.id,
       merchant_id: product.merchant_id,
       branch_id: product.shop_id,
+      product_id: product.product_id,
       inventory_item_id: product.inventory_item_id,
       customer_name: profile?.full_name || "Customer",
-      customer_phone: profile?.phone || "",
+      customer_phone: profile?.phone || "9800000000",
       customer_email: user.email ?? null,
       quantity: reserveQty,
       total_price: totalPrice,
@@ -217,7 +219,13 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
               </div>
-              <div className="mt-4">
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <Link href={`/customer/shop/${product.shop_id}`}>
+                  <Button variant="primary" size="sm" className="bg-teal-600 hover:bg-teal-700">
+                    <Store className="w-4 h-4 mr-2" />
+                    View Storefront & Inventory
+                  </Button>
+                </Link>
                 <a
                   href={`https://www.google.com/maps?q=${product.latitude},${product.longitude}`}
                   target="_blank"

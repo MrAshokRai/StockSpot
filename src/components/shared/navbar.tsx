@@ -20,6 +20,7 @@ import {
   Clock,
   ArrowRightLeft,
 } from "lucide-react";
+import { NotificationDropdown } from "@/components/shared/notification-dropdown";
 import type { Profile } from "@/types";
 
 export function Navbar() {
@@ -203,14 +204,7 @@ export function Navbar() {
 
             {profile ? (
               <>
-                <div className="relative hidden md:block">
-                  <Bell className="w-5 h-5 text-gray-500" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
-                  )}
-                </div>
+                <NotificationDropdown profile={profile} mode={mode} />
                 <div className="hidden md:flex items-center gap-2">
                   <span className="text-sm text-gray-700">{profile.full_name || profile.email}</span>
                   <Button variant="ghost" size="sm" onClick={handleLogout}>
