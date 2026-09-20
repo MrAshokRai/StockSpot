@@ -10,8 +10,10 @@ package-lock.json
 .env.local
 .env.*.local
 .sourcemap
-# Build outputs  
+# Next build artifacts
 .next/
+.next-types/
+tsconfig.tsbuildinfo
 out/
 dist/
 *.lcov
